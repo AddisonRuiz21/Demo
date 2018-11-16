@@ -51,6 +51,7 @@ class Player(Sprite):
             self.vel.y = -PLAYER_JUMP
 
 
+
 class Platform(Sprite):
     def __init__(self, x, y, w, h):
         Sprite.__init__(self)
