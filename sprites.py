@@ -37,7 +37,7 @@ class Player(Sprite):
         # self.image = pg.Surface((30,40))
         # self.image = self.game.spritesheet.get_image(614,1063,120,191)
         self.image = self.standing_frames[0]
-        self.image.set_colorkey(BLACK)
+        self.image.set_colorkey(BIG_GREY)
         # self.image.fill(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH / 2, HEIGHT /2)
@@ -46,21 +46,21 @@ class Player(Sprite):
         self.acc = vec(0, 0)
         print("adding vecs " + str(self.vel + self.acc))
     def load_images(self):
-        self.standing_frames = [self.game.spritesheet.get_image(690, 406, 120, 201),
-                                self.game.spritesheet.get_image(614, 1063, 120, 191)
+        self.standing_frames = [self.game.spritesheet.get_image(1,1,1100,1100),
                                 ]
         for frame in self.standing_frames:
-            frame.set_colorkey(BLACK)
-        self.walk_frames_r = [self.game.spritesheet.get_image(678, 860, 120, 201),
-                                self.game.spritesheet.get_image(692, 1458, 120, 207)
+            frame.set_colorkey(BIG_GREY)
+        self.walk_frames_r = [self.game.spritesheet.get_image(2205,1,1100,1100),
+                                self.game.spritesheet.get_image(1,1103,1100,1100),
+                                self.game.spritesheet.get_image(3307,1,1100,1100),
                                 ]
         '''setup left frames by flipping and appending them into an empty list'''
         self.walk_frames_l = []
         for frame in self.walk_frames_r:
-            frame.set_colorkey(BLACK)
+            frame.set_colorkey(BIG_GREY)
             self.walk_frames_l.append(pg.transform.flip(frame, True, False))
         self.jump_frame = self.game.spritesheet.get_image(382, 763, 150, 181)
-        self.jump_frame.set_colorkey(BLACK)
+        self.jump_frame.set_colorkey(BIG_GREY)
     def update(self):
         self.animate()
         self.acc = vec(0, PLAYER_GRAV)
@@ -169,17 +169,30 @@ class Cloud(Sprite):
         if self.rect.x > WIDTH:
             self.rect.x = -self.rect.width
 class Platform(Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, zone, x, y):
         # allows layering in LayeredUpdates sprite group
         self._layer = PLATFORM_LAYER
         # add Platforms to game groups when instantiated
         self.groups = game.all_sprites, game.platforms
         Sprite.__init__(self, self.groups)
         self.game = game
-        images = [self.game.spritesheet.get_image(0, 288, 380, 94), 
-                  self.game.spritesheet.get_image(213, 1662, 201, 100)]
-        self.image = random.choice(images)
-        self.image.set_colorkey(BLACK)
+        imagegrass = [self.game.spritesheet.get_image(0, 288, 380, 94), 
+                    self.game.spritesheet.get_image(213, 1662, 201, 100)]
+        imagesand = [self.game.spritesheet.get_image(0, 672, 380, 94), 
+                    self.game.spritesheet.get_image(208, 1879, 201, 100)]
+        imagewasteland = [self.game.spritesheet.get_image(0, 96, 380, 94), 
+                    self.game.spritesheet.get_image(282, 408, 200, 100)]
+        imagesnow = [self.game.spritesheet.get_image(0, 768, 380, 94), 
+                    self.game.spritesheet.get_image(213, 1764, 201, 100)]
+        if zone == "grass":
+            self.image = random.choice(imagegrass)
+        if zone == "sand":
+            self.image = random.choice(imagesand)
+        if zone == "wasteland":
+            self.image = random.choice(imagewasteland)
+        elif zone == "snow":
+            self.image = random.choice(imagesnow)
+        self.image = self.image.set_colorkey(BLACK)    
         '''leftovers from random rectangles before images'''
         # self.image = pg.Surface((w,h))
         # self.image.fill(WHITE)

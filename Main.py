@@ -6,10 +6,13 @@
 Curious, Creative, Tenacious(requires hopefulness)
 
 **********Gameplay ideas:
-make enemies come up towards the player until death
+make enemies come up towards the player until death Done
 
 **********Bugs
-platforms are stuck together and ineffective
+platforms are stuck together and ineffective Done
+
+**********Cosmetics
+Sprite changes with three frames
 
 **********Gameplay fixes
 Platform randomness leaves player in limbo for extended periods
@@ -34,7 +37,7 @@ class Game:
         # init sound mixer
         pg.mixer.init()
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        pg.display.set_caption("Teaxes Ted")
+        pg.display.set_caption("Big Iron")
         self.clock = pg.time.Clock()
         self.running = True
         self.font_name = pg.font.match_font(FONT_NAME)
@@ -58,7 +61,9 @@ class Game:
                 self.highscore = 0
                 print("exception")
         # load spritesheet image
-        self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET)) 
+        self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET))
+        
+        
         #load cloud images
         self.cloud_images = []
         for i in range(1,4):
@@ -72,6 +77,9 @@ class Game:
         self.head_jump_sound = pg.mixer.Sound(path.join(self.snd_dir, 'Jump39.wav'))
     def new(self):
         self.score = 0
+        self.zone = "Wasteland"
+        self.zoneRotation = 0
+        self.changeinscore = 0
         # add all sprites to the pg group
         # below no longer needed - using LayeredUpdate group
         # self.all_sprites = pg.sprite.Group()
@@ -94,7 +102,7 @@ class Game:
         for plat in PLATFORM_LIST:
             # no longer need to assign to variable because we're passing self.groups in Sprite library
             # p = Platform(self, *plat)
-            Platform(self, *plat)
+            Platform(self, self.zone, *plat )
             # no longer needed because we pass in Sprite lib file
             # self.all_sprites.add(p)
             # self.platforms.add(p)
@@ -112,17 +120,31 @@ class Game:
         # set boolean playing to true
         self.playing = True
         while self.playing:
-            self.clock.tick(FPS)
+            self.clock.tick(FPS)    
             self.events()
             self.update()
             self.draw()
-        pg.mixer.music.fadeout(1000)
+        # pg.mixer.music.fadeout(1000)
     def update(self):
         self.all_sprites.update()
-        
+        if self.changeinscore < self.score:
+            self.changeinscore = self.score + 3500
+            self.zoneRotation +=1
+            if self.zoneRotation == 0:
+                self.zone = "grass"
+            elif self.zoneRotation == 1:
+                self.zone = "sand"
+            elif self.zoneRotation == 2:
+                self.zone = "wasteland"
+            elif self.zoneRotation == 3:
+                self.zone = "snow"
+            if self.zoneRotation >= 4:
+                self.zoneRotation = 0
+                self.zone = "grass"
+            
         # shall we spawn a mob?
         now = pg.time.get_ticks()
-        if now - self.mob_timer > 0.5  + random.choice([-1000, -500, 0, 500, 1000]):
+        if now - self.mob_timer > 0.05  + random.choice([-10000, -5000, 0, 5000, 10000]):
             self.mob_timer = now
             Mob(self)
         ##### check for mob collisions ######
@@ -131,7 +153,7 @@ class Game:
         mob_hits = pg.sprite.spritecollide(self.player, self.mobs, False, pg.sprite.collide_mask)
         if mob_hits:
             # can use mask collide here if mob count gets too high and creates performance issues
-            if self.player.pos.y - 35 < mob_hits[0].rect_top:
+            if self.player.pos.y - 10 < mob_hits[0].rect_top:
                 print("hit top")
                 print("player is " + str(self.player.pos.y))
                 print("mob is " + str(mob_hits[0].rect_top))
@@ -177,7 +199,7 @@ class Game:
             for plat in self.platforms:
                 # creates slight scroll based on player y velocity
                 plat.rect.y += max(abs(self.player.vel.y), 2)
-                if plat.rect.top >= HEIGHT + 40:
+                if plat.rect.top >= HEIGHT + 50:
                     plat.kill()
                     self.score += 10
         # if player hits a power up
@@ -194,12 +216,12 @@ class Game:
             for sprite in self.all_sprites:
                 sprite.rect.y -= max(self.player.vel.y, 10)
                 '''get rid of sprites as they fall up'''
-                if sprite.rect.bottom < -25:
+                if sprite.rect.bottom < -10 :
                     sprite.kill()
         if len(self.platforms) == 0:
             self.playing = False
         # generate new random platforms
-        while len(self.platforms) < 6:
+        while len(self.platforms) < 8:
             width = random.randrange(50, 100)
             ''' removed widths and height params to allow for sprites '''
             """ changed due to passing into groups through sprites lib file """
@@ -223,7 +245,16 @@ class Game:
                         """ # cuts the jump short if the space bar is released """
                         # self.player.jump_cut()
     def draw(self):
-        self.screen.fill(SKY_BLUE)
+        if self.zone == 'grass':
+            self.screen.fill(SKY_BLUE)
+        if self.zone == 'sand':
+            self.screen.fill(SKY_BLUE)
+        if self.zone == 'wasteland':
+            self.screen.fill(WASTELAND_SKY)
+        if self.zone == 'snow':
+            self.screen.fill(SCRAP_GRAY)
+        else:
+            self.screen.fill(SKY_BLUE)
         self.all_sprites.draw(self.screen)
         """ # not needed now that we're using LayeredUpdates """
         # self.screen.blit(self.player.image, self.player.rect)
